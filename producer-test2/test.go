@@ -2,7 +2,6 @@ package main
 
 import (
 	"strconv"
-	"time"
 
 	"github.com/go-redis/redis/v8"
 	remagic "github.com/stormi-li/Remagic"
@@ -18,8 +17,7 @@ func main() {
 	})
 	client := remagic.NewClient(redisClient, "remagic-namespace")
 	producer := client.NewProducer("channel-1")
-	for i := 0; i < 10000; i++ {
+	for i := 0; i < 500; i++ {
 		producer.Publish([]byte("bye world" + strconv.Itoa(i)))
-		time.Sleep(5 * time.Millisecond)
 	}
 }
