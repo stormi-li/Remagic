@@ -58,10 +58,8 @@ func (consumer *Consumer) handleConnection(conn net.Conn) {
 
 	// 用于存放拼接的分块数据，支持连续读取消息
 	tempBuffer := make([]byte, 0)
-
+	buffer := make([]byte, 1024)
 	for {
-		// 读取数据到临时缓冲区
-		buffer := make([]byte, 1024)
 		n, err := conn.Read(buffer)
 		if err != nil {
 			break
@@ -92,7 +90,6 @@ func (consumer *Consumer) handleConnection(conn net.Conn) {
 			if bytes.HasSuffix(messageBuf, []byte("<END>")) {
 				// 去掉结束标识符，获取消息内容
 				fullMessage := messageBuf[:len(messageBuf)-len("<END>")]
-
 				// 发送完整消息到消息通道，或放入缓冲区
 				consumer.bufferLock.Lock()
 				for len(consumer.buffer) > 0 {
@@ -108,7 +105,6 @@ func (consumer *Consumer) handleConnection(conn net.Conn) {
 						break
 					}
 				}
-
 				select {
 				case consumer.messageChan <- fullMessage:
 				default:
