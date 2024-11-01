@@ -1,7 +1,6 @@
 package remagic
 
 import (
-	"bytes"
 	"encoding/binary"
 	"net"
 	"strings"
@@ -86,32 +85,27 @@ func (consumer *Consumer) handleConnection(conn net.Conn) {
 
 			// 4. 提取完整的消息体
 			messageBuf := tempBuffer[4:totalLength]
-			// 检查是否包含结束标识符 "<end>"
-			if bytes.HasSuffix(messageBuf, []byte("<END>")) {
-				// 去掉结束标识符，获取消息内容
-				fullMessage := messageBuf[:len(messageBuf)-len("<END>")]
-				// 发送完整消息到消息通道，或放入缓冲区
-				consumer.bufferLock.Lock()
-				for len(consumer.buffer) > 0 {
-					flag := false
-					select {
-					case consumer.messageChan <- consumer.buffer[0]: // 非阻塞写入
-						// 发送成功后删除缓冲区中的消息
-						consumer.buffer = consumer.buffer[1:]
-					default:
-						flag = true
-					}
-					if flag {
-						break
-					}
-				}
+			// 发送完整消息到消息通道，或放入缓冲区
+			consumer.bufferLock.Lock()
+			for len(consumer.buffer) > 0 {
+				flag := false
 				select {
-				case consumer.messageChan <- fullMessage:
+				case consumer.messageChan <- consumer.buffer[0]: // 非阻塞写入
+					// 发送成功后删除缓冲区中的消息
+					consumer.buffer = consumer.buffer[1:]
 				default:
-					consumer.buffer = append(consumer.buffer, fullMessage)
+					flag = true
 				}
-				consumer.bufferLock.Unlock()
+				if flag {
+					break
+				}
 			}
+			select {
+			case consumer.messageChan <- messageBuf:
+			default:
+				consumer.buffer = append(consumer.buffer, messageBuf)
+			}
+			consumer.bufferLock.Unlock()
 
 			// 5. 从缓存中移除已处理的消息
 			tempBuffer = tempBuffer[totalLength:]

@@ -50,7 +50,7 @@ func (producer *Producer) Publish(message []byte) error {
 		count++
 	}
 	retryCount := 0
-	fullMessage := []byte(string(message) + "<END>")
+	fullMessage := []byte(string(message))
 	messageLength := uint32(len(fullMessage))
 
 	// 1. 写入消息长度前缀
