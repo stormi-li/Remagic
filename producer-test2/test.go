@@ -17,6 +17,7 @@ func main() {
 	})
 	client := remagic.NewClient(redisClient, "remagic-namespace")
 	producer := client.NewProducer("channel-1")
+	producer.SetMaxRetries(10)
 	for i := 0; i < 500; i++ {
 		producer.Publish([]byte("bye world" + strconv.Itoa(i)))
 	}
