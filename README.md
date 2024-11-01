@@ -60,8 +60,6 @@ func main() {
 package main
 
 import (
-	"fmt"
-
 	"github.com/go-redis/redis/v8"
 	remagic "github.com/stormi-li/Remagic"
 )
