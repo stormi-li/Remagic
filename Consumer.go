@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	researd "github.com/stormi-li/Researd"
+	"github.com/stormi-li/Remagic/Researd"
 )
 
 type Consumer struct {

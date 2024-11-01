@@ -2,7 +2,7 @@ package remagic
 
 import (
 	"github.com/go-redis/redis/v8"
-	researd "github.com/stormi-li/Researd"
+	"github.com/stormi-li/Remagic/Researd"
 )
 
 type Client struct {

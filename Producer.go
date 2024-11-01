@@ -6,7 +6,7 @@ import (
 	"net"
 	"time"
 
-	researd "github.com/stormi-li/Researd"
+	researd "github.com/stormi-li/Remagic/Researd"
 )
 
 type Producer struct {
