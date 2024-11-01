@@ -19,6 +19,6 @@ func (c *Client) NewProducer(channel string) *Producer {
 	return newProducer(c.researdClient, channel)
 }
 
-func (c *Client) NewConsumer(channel, address string, weight int) *Consumer {
-	return newConsumer(c.researdClient, channel, address, weight)
+func (c *Client) NewConsumer(channel string, weight int, address string) *Consumer {
+	return newConsumer(c.researdClient, channel, weight, address)
 }

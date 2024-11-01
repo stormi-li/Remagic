@@ -91,9 +91,9 @@ The parameter is channel name.
 
 ### Create a new consumer
 ```go
-consumer := client.NewConsumer("channel-1", “localhost:8899", 3)
+consumer := client.NewConsumer("channel-1", 3, "localhost:8899")
 ```
-The first parameter is channel name,  the second parameter is host address, the third parameter is host weight.
+The first parameter is channel name,  the second parameter is host weight, the third parameter is host address.
 
 # Interface - remagic.Producer
 
@@ -103,7 +103,7 @@ The first parameter is channel name,  the second parameter is host address, the 
 ```go
 producer.SetMaxRetries(10)
 ```
-The parameter is max retries, the default value is 5.
+The parameter is max retries, the default value is 5. The total waiting time is maxRetries * 500 * time.Millisecond
 
 ## Publish
 

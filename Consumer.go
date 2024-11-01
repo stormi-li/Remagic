@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/stormi-li/Remagic/Researd"
+	researd "github.com/stormi-li/Remagic/Researd"
 )
 
 type Consumer struct {
@@ -19,7 +19,7 @@ type Consumer struct {
 	bufferLock    sync.Mutex
 }
 
-func newConsumer(researdCLient *researd.Client, channel string, address string, weight int) *Consumer {
+func newConsumer(researdCLient *researd.Client, channel string, weight int, address string) *Consumer {
 	listener, err := net.Listen("tcp", ":"+strings.Split(address, ":")[1])
 	if err != nil {
 		panic(err)
@@ -33,7 +33,7 @@ func newConsumer(researdCLient *researd.Client, channel string, address string, 
 		buffer:        [][]byte{},
 		bufferLock:    sync.Mutex{},
 	}
-	go researdCLient.Register(channel, address, weight)
+	go researdCLient.Register(channel, weight, address)
 	go consumer.startListen()
 	return &consumer
 }

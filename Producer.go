@@ -39,11 +39,13 @@ func (producer *Producer) SetMaxRetries(maxRetries int) {
 	producer.maxRetries = maxRetries
 }
 
+const waitTime = 500
+
 func (producer *Producer) Publish(message []byte) error {
 	// 设置重试次数限制，避免无限重试
 	count := 0
 	for producer.conn == nil {
-		time.Sleep(2 * time.Second)
+		time.Sleep(waitTime * time.Millisecond)
 		if count == producer.maxRetries {
 			return fmt.Errorf("以达到最大重试次数")
 		}
@@ -61,7 +63,7 @@ func (producer *Producer) Publish(message []byte) error {
 
 		_, err := producer.conn.Write(append(lengthBuf, fullMessage...))
 		if err != nil {
-			time.Sleep(2 * time.Second)
+			time.Sleep(waitTime * time.Millisecond)
 		} else {
 			return nil
 		}
