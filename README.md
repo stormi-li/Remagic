@@ -109,7 +109,7 @@ The parameter is max retries, the default value is 5.
 
 ### Publish message
  ```go
-err := producer.Publish([]byte("hellow world")
+err := producer.Publish([]byte("hellow world"))
 ```
 The parameter is message. When the maximum number of retries is reached, an error is returned. 
 
