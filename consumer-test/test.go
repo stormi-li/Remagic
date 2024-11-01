@@ -17,7 +17,7 @@ func main() {
 		Password: password,
 	})
 	client := remagic.NewClient(redisClient, "remagic-namespace")
-	consumer := client.NewConsumer("channel-1", 3, "118.25.196.166:8888")
+	consumer := client.NewConsumer("channel-1", remagic.Standby, "118.25.196.166:8838")
 	consumer.SetCapacity(50)
 	consumer.HandleMessage(func(message []byte) {
 		fmt.Println(string(message))

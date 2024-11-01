@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -18,14 +17,9 @@ func main() {
 		Password: password,
 	})
 	client := remagic.NewClient(redisClient, "remagic-namespace")
-	consumer := client.NewConsumer("channel-1", 3, "118.25.196.166:8889")
-	go consumer.HandleMessage(func(message []byte) {
+	consumer := client.NewConsumer("channel-1", remagic.Main, "118.25.196.166:8889")
+	consumer.HandleMessage(func(message []byte) {
 		fmt.Println(string(message))
-		time.Sleep(2 * time.Millisecond)
+		time.Sleep(50 * time.Millisecond)
 	})
-	producer := client.NewProducer("channel-1")
-	for i := 0; i < 500; i++ {
-		producer.Publish([]byte("hellow world" + strconv.Itoa(i)))
-	}
-	select {}
 }

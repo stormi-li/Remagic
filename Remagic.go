@@ -2,7 +2,7 @@ package remagic
 
 import (
 	"github.com/go-redis/redis/v8"
-	"github.com/stormi-li/Remagic/Researd"
+	researd "github.com/stormi-li/Researd"
 )
 
 type Client struct {
@@ -11,7 +11,7 @@ type Client struct {
 
 func NewClient(redisClient *redis.Client, namespace string) *Client {
 	return &Client{
-		researdClient: researd.NewClient(redisClient, namespace),
+		researdClient: researd.NewClient(redisClient, namespace, researd.MQ),
 	}
 }
 
@@ -19,6 +19,6 @@ func (c *Client) NewProducer(channel string) *Producer {
 	return newProducer(c.researdClient, channel)
 }
 
-func (c *Client) NewConsumer(channel string, weight int, address string) *Consumer {
-	return newConsumer(c.researdClient, channel, weight, address)
+func (c *Client) NewConsumer(channel string, nodeType researd.NodeType, address string) *Consumer {
+	return newConsumer(c.researdClient, channel, nodeType, address)
 }

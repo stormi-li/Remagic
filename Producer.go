@@ -2,17 +2,17 @@ package remagic
 
 import (
 	"encoding/binary"
-	"fmt"
 	"net"
 	"time"
 
-	researd "github.com/stormi-li/Remagic/Researd"
+	researd "github.com/stormi-li/Researd"
 )
 
 type Producer struct {
 	researdClient *researd.Client
 	channel       string
 	maxRetries    int
+	address       string
 	conn          net.Conn
 }
 
@@ -22,16 +22,24 @@ func newProducer(researdClient *researd.Client, channel string) *Producer {
 		maxRetries:    5,
 		channel:       channel,
 	}
-	go producer.connet()
+	go producer.listen()
 	return &producer
 }
 
-func (producer *Producer) connet() {
-	producer.researdClient.Discover(producer.channel, func(addr string) {
-		conn, err := net.Dial("tcp", addr)
-		if err == nil {
-			producer.conn = conn
-		}
+func (producer *Producer) connect() error {
+	conn, err := net.Dial("tcp", producer.address)
+	if err == nil {
+		producer.conn = conn
+		return nil
+	}
+	return err
+}
+
+func (producer *Producer) listen() {
+	dicovery := producer.researdClient.NewDiscovery(producer.channel)
+	dicovery.Listen(func(addr string) {
+		producer.address = addr
+		producer.connect()
 	})
 }
 
@@ -39,31 +47,38 @@ func (producer *Producer) SetMaxRetries(maxRetries int) {
 	producer.maxRetries = maxRetries
 }
 
-const waitTime = 500
-
 func (producer *Producer) Publish(message []byte) error {
 	// 设置重试次数限制，避免无限重试
-	count := 0
-	for producer.conn == nil {
-		time.Sleep(waitTime * time.Millisecond)
-		if count == producer.maxRetries {
-			return fmt.Errorf("以达到最大重试次数")
-		}
-		count++
-	}
+	var err error
 	retryCount := 0
-	fullMessage := []byte(string(message))
-	messageLength := uint32(len(fullMessage))
+	for producer.conn == nil {
+		err = producer.connect()
+		if err == nil {
+			break
+		}
+		time.Sleep(const_waitTime)
+		if retryCount == producer.maxRetries {
+			return err
+		}
+		retryCount++
+	}
+	retryCount = 0
+
+	byteMessage := []byte(string(message))
+	messageLength := uint32(len(byteMessage))
 
 	// 1. 写入消息长度前缀
 	lengthBuf := make([]byte, 4)
 	binary.BigEndian.PutUint32(lengthBuf, messageLength)
+
 	for {
 		// 尝试写入字节流
-
-		_, err := producer.conn.Write(append(lengthBuf, fullMessage...))
+		_, err = producer.conn.Write(append(lengthBuf, byteMessage...))
 		if err != nil {
-			time.Sleep(waitTime * time.Millisecond)
+			err = producer.connect()
+			if err != nil {
+				time.Sleep(const_waitTime)
+			}
 		} else {
 			return nil
 		}
@@ -72,5 +87,5 @@ func (producer *Producer) Publish(message []byte) error {
 		}
 		retryCount++
 	}
-	return fmt.Errorf("以达到最大重试次数")
+	return err
 }

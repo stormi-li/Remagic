@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/go-redis/redis/v8"
 	remagic "github.com/stormi-li/Remagic"
@@ -24,5 +25,6 @@ func main() {
 		if err != nil {
 			fmt.Println(err)
 		}
+		time.Sleep(100 * time.Millisecond)
 	}
 }
